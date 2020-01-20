@@ -4,8 +4,8 @@
 //ID: 		2991-9119-97
 //Email:	shilinch@usc.edu     
 //Compiled on MAC cmd with g++
-// >> g++ HW1_Problem1.cpp HW1_Problem1
-// >> ./HW1_Problem1 Dog.raw DemosaicingDog.raw
+// >> g++ HW1_Problem1_3.cpp HW1_Problem1_3
+// >> ./HW1_Problem1_3 Toy.raw Histogram.txt
 /*------------------------------*/
 // This sample code reads in image data from a RAW image file and 
 // writes it into another file
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	FILE *file;
 	int BytesPerPixel;
 	int Size = 256;
-	int Width = 564;
+	int Width = 560;
 	int Height = 400;
 	int RGB_BytePerPixel = 3;
 
@@ -58,9 +58,6 @@ int main(int argc, char *argv[])
 			Size = atoi(argv[4]);
 		}
 	}
-	
-	// Allocate image data array **
-
 
 	unsigned char Imagedata[Height][Width][RGB_BytePerPixel];
 
@@ -77,12 +74,14 @@ int main(int argc, char *argv[])
 
 	int col = 0;
 	int row = 0;
+	int total = 0;
 
 	for(col = 0; col < Width; col++) {
 		for(row = 0; row < Height; row++) {
 			H.Blue[Imagedata[row][col][0]]++;	
 			H.Green[Imagedata[row][col][1]]++;
 			H.Red[Imagedata[row][col][2]]++;
+			total++;
 		}
 	}
 	if (!(file=fopen(argv[2],"w"))) {
@@ -91,24 +90,26 @@ int main(int argc, char *argv[])
 	}
 
 	int n = 0;
-	//fprintf(file,"Blue Histogram Value:\n");
+
+	// print Blue Histogram values
 	for(n = 0;n < 256; n++){
 		fprintf(file,"%d\n",H.Blue[n]);
 	}
 	fprintf(file,"\n");
-	//fprintf(file,"Green Histogram Value:\n");
-
+	// print Green Histogram values
 	for(n = 0;n < 256; n++){
 		fprintf(file,"%d\n",H.Green[n]);
 	}
 	fprintf(file,"\n");
-	//fprintf(file,"Red Histogram Value:\n");
-	
+	// print Red Histogram values
 	for(n = 0;n < 256; n++){
 		fprintf(file,"%d\n",H.Red[n]);
 	}
 
 	fclose(file);
+
+	//cout << "total pixels for each channel:" << total << endl;
+	//total = 225600
 
 	return 0;
 }
