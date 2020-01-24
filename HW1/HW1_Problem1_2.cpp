@@ -4,15 +4,9 @@
 //ID: 		2991-9119-97
 //Email:	shilinch@usc.edu     
 //Compiled on MAC cmd with g++
-// >> g++ HW1_Problem1.cpp HW1_Problem1
-// >> ./HW1_Problem1 Dog.raw DemosaicingDog.raw
-/*------------------------------*/
-// This sample code reads in image data from a RAW image file and 
-// writes it into another file
-
-// NOTE:	The code assumes that the image is of size 256 x 256 and is in the
-//			RAW format. You will need to make corresponding changes to
-//			accommodate images of different sizes and/or types
+// >> g++ HW1_Problem1_2.cpp HW1_Problem1_2
+// >> ./HW1_Problem1_2 Dog.raw Dog_MHC.raw
+/*-----------------------------------------*/
 
 #include <stdio.h>
 #include <iostream>
@@ -73,6 +67,7 @@ int main(int argc, char *argv[])
 	double b = 0.625;
 	double r = 0.75;
 
+
   /******************************************************************
     pattern  1. GRG //all G1 values are at even row and even column 
   				BGB													
@@ -119,9 +114,9 @@ int main(int argc, char *argv[])
 			unsigned char R;
 			unsigned char G;
 			unsigned char B;
-			unsigned char R_MHC;
-			unsigned char G_MHC;
-			unsigned char B_MHC;
+			double R_MHC;
+			double G_MHC;
+			double B_MHC;
 
 			switch(_case) {
 				case 1: //BGB
@@ -249,9 +244,27 @@ int main(int argc, char *argv[])
 					R_MHC = R;
 
 				} break;
-			}
-
-				// Store RGB value in Demosaiced Imagedata with size of 600*532*3
+			}	
+			// handle pixel points with overflow value
+				if (B_MHC < 0) {
+					B_MHC = 0;
+				}
+				else if (B_MHC > 255) {
+					B_MHC = 255;
+				}
+				if (G_MHC < 0) {
+					G_MHC = 0;
+				}
+				else if (G_MHC > 255) {
+					G_MHC = 255;
+				}
+				if (R_MHC < 0) {
+					R_MHC = 0;
+				}
+				else if (R_MHC > 255) {
+					R_MHC = 255;
+				}	
+			// Store RGB value in Demosaiced Imagedata with size of 600*532*3
 				Demo_Imagedata[row][col][0] = B_MHC ;  
 				Demo_Imagedata[row][col][1] = G_MHC ; 
 				Demo_Imagedata[row][col][2] = R_MHC ;
