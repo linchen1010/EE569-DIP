@@ -15,29 +15,19 @@
 using namespace std;
 const int Width = 320;
 const int Height = 320;
-double sigma_c = 0.05;
-double sigma_s = 4;
 
+// calculate weight function
 double window (unsigned char image[Height][Width], int i, int j, int k, int l, double sigma_s, double sigma_r) {
-
  	double result = exp ( - ((pow(i-k,2)+pow(j-l,2)) / (2*pow(sigma_s,2))) - pow(abs(image[i][j]-image[k][l]),2) / (2*pow(sigma_r,2)));
  	return result;
  }
-
-double myfunct (double a, double b) {
-
-	return a;
-}
 
 int main(int argc, char *argv[])
 
 { 
 	// Define file pointer and variables
 	FILE *file;
-	FILE *file2;
 	int BytesPerPixel = 1;
-	//int Width = 320;
-	//int Height = 320;
 
 	// Check for proper syntax
 	if (argc < 3){
@@ -62,9 +52,9 @@ int main(int argc, char *argv[])
 	int row = 0;
 	int col = 0;
 	int n = 0;
-	// s = 2 // r = 50
-	double sigma_s = 9;
-	double sigma_r = 50;
+	// sigma_s = spatial parameter // sigma_r = range parameter
+	double sigma_s = 20; // 2 20 100
+	double sigma_r = 50; // 2 20 100
 	double temp_w = 0;
 	double tempImageValue = 0;
 	double temp = 0;
@@ -76,22 +66,22 @@ int main(int argc, char *argv[])
 		for(col = 0; col < Width; col++) {
 			temp_w = 0;
 			tempImageValue = 0;
-			for(n = -1; n < 2; n++) { // filter
+			for(n = -2; n < 3; n++) { // bilater filter part
 				i = row;
 				j = col;
+				temp_w += window(Imagedata, i, j, row-2, col+n,sigma_s,sigma_r);
 				temp_w += window(Imagedata, i, j, row-1, col+n,sigma_s,sigma_r);
 				temp_w += window(Imagedata, i, j, row, col+n,sigma_s,sigma_r);
 				temp_w += window(Imagedata, i, j, row+1, col+n,sigma_s,sigma_r);
+				temp_w += window(Imagedata, i, j, row+2, col+n,sigma_s,sigma_r);
 
-				tempImageValue += Imagedata[row-1][col+n] * window(Imagedata, i, j,row-1, col+n, sigma_s, sigma_r) ;
+				tempImageValue += Imagedata[row-2][col+n] * window(Imagedata, i, j,row-2, col+n, sigma_s, sigma_r) ;
+				tempImageValue += Imagedata[row-1][col+n] * window(Imagedata, i, j, row-1, col+n, sigma_s, sigma_r) ;
 				tempImageValue += Imagedata[row][col+n] * window(Imagedata, i, j, row, col+n, sigma_s, sigma_r) ;
 				tempImageValue += Imagedata[row+1][col+n] * window(Imagedata, i, j, row+1, col+n, sigma_s, sigma_r) ;
+				tempImageValue += Imagedata[row+2][col+n] * window(Imagedata, i, j, row+2, col+n, sigma_s, sigma_r) ;
 			}
 			DenoiseImagedata[row][col] = tempImageValue/temp_w;
-			temp = tempImageValue/temp_w;
-			if(temp > 255) {
-				cout << temp << endl;
-			}
 		}
 
 	}
