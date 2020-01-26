@@ -4,8 +4,9 @@
 //ID: 		2991-9119-97
 //Email:	shilinch@usc.edu     
 //Compiled on MAC cmd with g++
+// Usage: (on MAC cmd)
 // >>$ g++ HW1_Problem1_3_2.cpp HW1_Problem1_3_2
-// >>$ ./HW1_Problem1_3_2 Toy.raw CumHistogram.txt HistToy.raw
+// >>$ ./HW1_Problem1_3_2 Toy.raw TransferFunction.txt HistToy.raw
 /*-----------------------------------------------------------*/
 
 #include <stdio.h>
@@ -49,19 +50,6 @@ int main(int argc, char *argv[])
 		cout << "program_name input_image.raw output_HistogramValue.txt Output_Histogram.raw" << endl;
 		return 0;
 	}
-	
-	/*
-	// Check if image is grayscale or color
-	if (argc < 4){
-		BytesPerPixel = 1; // default is grey image
-	} 
-	else {
-		BytesPerPixel = atoi(argv[3]);
-		// Check if size is specified
-		if (argc >= 5){
-			Size = atoi(argv[4]);
-		}
-	}*/
 
 	unsigned char Imagedata[Height][Width][RGB_BytePerPixel];
 	unsigned char Hist_Imagedata[Height][Width][RGB_BytePerPixel];
@@ -101,7 +89,7 @@ int main(int argc, char *argv[])
 		cumHistogramBlue += H.Blue[n];
 		H.CumProBlue[n] = cumHistogramBlue / totalPixel;
 		H.CpValueBlue[n] = floor(255*H.CumProBlue[n]);
-		fprintf(file,"%.1f\n",cumHistogramBlue);
+		fprintf(file,"%d\n",int(H.CpValueBlue[n]));
 	}
 	fprintf(file,"\n");
 
@@ -110,7 +98,7 @@ int main(int argc, char *argv[])
 		cumHistogramGreen += H.Green[n];
 		H.CumProGreen[n] = cumHistogramGreen / totalPixel;
 		H.CpValueGreen[n] = floor(255*H.CumProGreen[n]);
-		fprintf(file,"%.1f\n",cumHistogramGreen);
+		fprintf(file,"%d\n",int(H.CpValueGreen[n]));
 	}
 	fprintf(file,"\n");
 
@@ -119,7 +107,7 @@ int main(int argc, char *argv[])
 		cumHistogramRed += H.Red[n];
 		H.CumProRed[n] = cumHistogramRed / totalPixel;
 		H.CpValueRed[n] = floor(255*H.CumProRed[n]);
-		fprintf(file,"%.1f\n",cumHistogramRed);
+		fprintf(file,"%d\n",int(H.CpValueRed[n]));
 	}
 
 	fclose(file);
