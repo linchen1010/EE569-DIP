@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
 
 	// Allocate image data array **
 	unsigned char Imagedata [Height][Width];
-	unsigned char DenoiseImagedata [Height][Width]; // Image with  Uniform weight function filtering 
-	unsigned char Denoise2Imagedata [Height][Width][BytesPerPixel]; // Image with Gaussian weight function filtering
+	unsigned char DenoiseImagedata [Height][Width]; 
+	unsigned char Denoise2Imagedata [Height][Width][BytesPerPixel]; 
 	// Read image (filename specified by first argument) into image data matrix
 	if (!(file=fopen(argv[1],"rb"))) {
 		cout << "Cannot open file: " << argv[1] <<endl;
@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	int col = 0;
 	int n = 0;
 	// sigma_s = spatial parameter // sigma_r = range parameter
+	/* Please choose parameter here */
 	double sigma_s = 20; // 2 20 100
 	double sigma_r = 50; // 2 20 100
 	double temp_w = 0;
