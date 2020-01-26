@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
 	}
 	
 	// Allocate image data array **
-
-	unsigned char Imagedata[Height][Width][BytesPerPixel];
+	unsigned char ImagedataOriginal[Height][Width][BytesPerPixel];
+	unsigned char Imagedata[Height+4][Width+4][BytesPerPixel];
 	unsigned char Demo_Imagedata[Height][Width][RGB_BytePerPixel];
 
 	// Read image (filename specified by first argument) into image data matrix
@@ -62,13 +62,34 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	//fread(Imagedata, sizeof(unsigned char), Size*Size*BytesPerPixel, file);
-	fread(Imagedata, sizeof(unsigned char), Width*Height*BytesPerPixel, file);
+	fread(ImagedataOriginal, sizeof(unsigned char), Width*Height*BytesPerPixel, file);
 	fclose(file);
 
 	///////////////////////// INSERT YOUR PROCESSING CODE HERE /////////////////////////
 
 	int row = 0;
 	int col = 0;
+
+	/* Mirror reflecting -- Image boundary padding */
+	for(col = 0; col < Width; col++) {
+		for(row = 0; row < Height; row++) {
+			Imagedata[row+2][col+2][0] = ImagedataOriginal[row][col][0];
+		}
+	}
+
+	for(row = 2; row < Height; row++) {
+		Imagedata[row][0][0] = ImagedataOriginal[row-2][0][0];
+		Imagedata[row][1][0] = ImagedataOriginal[row-2][1][0];
+		Imagedata[row][Width+3][0] = ImagedataOriginal[row-2][Width-1][0];
+		Imagedata[row][Width+2][0] = ImagedataOriginal[row-2][Width-2][0];
+	}
+
+	for(col = 2; col < Width; col++) {
+		Imagedata[0][col][0] = ImagedataOriginal[0][col-2][0];
+		Imagedata[1][col][0] = ImagedataOriginal[1][col-2][0];
+		Imagedata[Height+3][col][0] = ImagedataOriginal[Height-1][col-2][0];
+		Imagedata[Height+2][col][0] = ImagedataOriginal[Height-2][col-2][0];
+	}
 
   /******************************************************************
     partten: 1. GRG //all G1 values are at even row and even column
@@ -95,8 +116,8 @@ int main(int argc, char *argv[])
 		case 1 R G B value */
 	int _case = 0;
 
-	for(col = 0; col < Width; col++) {
-		for(row = 0; row < Height; row++) {
+	for(col = 2; col < Width+2; col++) {
+		for(row = 2; row < Height+2; row++) {
 
 			if(row % 2 == 0 & col % 2 == 0) {
 				_case = 1;
@@ -189,9 +210,10 @@ int main(int argc, char *argv[])
 				} break;
 			}
 				//Store RGB value in New Array with size of 600*532*3
-				Demo_Imagedata[row][col][0] = B;
-				Demo_Imagedata[row][col][1] = G;
-				Demo_Imagedata[row][col][2] = R;
+
+				Demo_Imagedata[row-2][col-2][0] = B;
+				Demo_Imagedata[row-2][col-2][1] = G;
+				Demo_Imagedata[row-2][col-2][2] = R;
 		}
 			
 	}
