@@ -32,8 +32,7 @@ int main(int argc, char *argv[]) {
 	}
     // Allocate image data array **
 	unsigned char Imagedata[Height][Width][BytesPerPixel];
-    unsigned char ImagedataFixTh[Height][Width][BytesPerPixel];
-    unsigned char ImagedataFS[Height][Width][BytesPerPixel];
+    double ImagedataFS[Height][Width][BytesPerPixel];
     unsigned char ImagedataFSResult[Height][Width][BytesPerPixel];
     double tempImage[Height][Width][BytesPerPixel];
     unsigned char ImagedataJJN[Height][Width][BytesPerPixel];
@@ -54,38 +53,53 @@ int main(int argc, char *argv[]) {
 
     for(row = 0; row < Height; row++) {
         for(col = 0; col < Width; col++) {
-            if(Imagedata[row][col][0] <= threshold) {
-                ImagedataFixTh[row][col][0] = 0;
-            }
-            else {
-                ImagedataFixTh[row][col][0] = 255;
-            }
             ImagedataFS[row][col][0] = Imagedata[row][col][0];
-            ImagedataJJN[row][col][0] = Imagedata[row][col][0];
-            ImagedataStucki[row][col][0] = Imagedata[row][col][0];
             tempImage[row][col][0] = Imagedata[row][col][0];
         }
     }
 
-    //Floyd-Steinberg
     for(row = 0; row < Height; row++) {
         // serpentine scanning
         if(row%2 == 0) { // ---->
             for(col = 0; col < Width; col++) {
-                error = ImagedataFS[row][col][0] - ImagedataFixTh[row][col][0];
+                if(ImagedataFS[row][col][0] > threshold) {
+                    error = Imagedata[row][col][0] - 255;
+                }
+                else {
+                    error = Imagedata[row][col][0] - 0;
+                }
                 ImagedataFS[row][col+1][0] += floor(error * 7/16.0);
                 ImagedataFS[row+1][col-1][0] += floor(error * 3/16.0);
                 ImagedataFS[row+1][col][0] += floor(error * 5/16.0);
                 ImagedataFS[row+1][col+1][0] += floor(error * 1/16.0);
+
+                if(ImagedataFS[row][col][0] < threshold) {
+                    ImagedataFSResult[row][col][0] = 0;
+                }
+                else {
+                    ImagedataFSResult[row][col][0] = 255;
+                }  
             }
         }
         else{   // <-----
             for(col = Width-1; col >= 0; col--) {
-                error = ImagedataFS[row][col][0] - ImagedataFixTh[row][col][0];
+                if(ImagedataFS[row][col][0] > threshold) {
+                    error = ImagedataFS[row][col][0] - 255;
+                }
+                else {
+                    error = ImagedataFS[row][col][0] - 0;
+                }
                 ImagedataFS[row][col-1][0] += floor(error * 7/16.0);
                 ImagedataFS[row+1][col+1][0] += floor(error * 3/16.0);
                 ImagedataFS[row+1][col][0] += floor(error * 5/16.0);
                 ImagedataFS[row+1][col-1][0] += floor(error * 1/16.0);
+                
+                if(ImagedataFS[row][col][0] < threshold) {
+                    ImagedataFSResult[row][col][0] = 0;
+                }  
+                else {
+                    ImagedataFSResult[row][col][0] = 255;
+                }  
             }
         }   
     }
@@ -94,36 +108,60 @@ int main(int argc, char *argv[]) {
     for(row = 0; row < Height; row++) {
         if(row%2 == 0) {
             for(col = 0; col < Width; col++) {
-                error = ImagedataJJN[row][col][0] - ImagedataFixTh[row][col][0];
-                ImagedataJJN[row][col+1][0] += (error * 7 / 48);
-                ImagedataJJN[row][col+2][0] += (error * 5 / 48);
-                ImagedataJJN[row+1][col-2][0] += (error * 3 / 48);
-                ImagedataJJN[row+1][col-1][0] += (error * 5 / 48);
-                ImagedataJJN[row+1][col][0] += (error * 7 / 48);
-                ImagedataJJN[row+1][col+1][0] += (error * 5 / 48);
-                ImagedataJJN[row+1][col+2][0] += (error * 3 / 48);
-                ImagedataJJN[row+2][col-2][0] += (error * 1 / 48);
-                ImagedataJJN[row+2][col-1][0] += (error * 3 / 48);
-                ImagedataJJN[row+2][col][0] += (error * 5 / 48);
-                ImagedataJJN[row+2][col+1][0] += (error * 3 / 48);
-                ImagedataJJN[row+2][col+2][0] += (error * 1 / 48);
+                if(tempImage[row][col][0] > threshold) {
+                    error = tempImage[row][col][0] - 255;
+                }
+                else {
+                    error = tempImage[row][col][0] - 0;
+                }
+                tempImage[row][col+1][0] += (error * 7 / 48);
+                tempImage[row][col+2][0] += (error * 5 / 48);
+                tempImage[row+1][col-2][0] += (error * 3 / 48);
+                tempImage[row+1][col-1][0] += (error * 5 / 48);
+                tempImage[row+1][col][0] += (error * 7 / 48);
+                tempImage[row+1][col+1][0] += (error * 5 / 48);
+                tempImage[row+1][col+2][0] += (error * 3 / 48);
+                tempImage[row+2][col-2][0] += (error * 1 / 48);
+                tempImage[row+2][col-1][0] += (error * 3 / 48);
+                tempImage[row+2][col][0] += (error * 5 / 48);
+                tempImage[row+2][col+1][0] += (error * 3 / 48);
+                tempImage[row+2][col+2][0] += (error * 1 / 48);
+
+                if(tempImage[row][col][0] < threshold) {
+                    ImagedataJJN[row][col][0] = 0;
+                }
+                else {
+                    ImagedataJJN[row][col][0] = 255;
+                }  
             }
         }
         else{
             for(col = Width-1; col >= 0; col--) {
-                error = ImagedataJJN[row][col][0] - ImagedataFixTh[row][col][0];
-                ImagedataJJN[row][col-1][0] += (error * 7/48);
-                ImagedataJJN[row][col-2][0] += (error * 5/48);
-                ImagedataJJN[row+1][col-2][0] += (error * 3/48);
-                ImagedataJJN[row+1][col-1][0] += (error * 5/48);
-                ImagedataJJN[row+1][col][0] += (error * 7/48);
-                ImagedataJJN[row+1][col+1][0] += (error * 5/48);
-                ImagedataJJN[row+1][col+2][0] += (error * 3/48);
-                ImagedataJJN[row+2][col-2][0] += (error * 1/48);
-                ImagedataJJN[row+2][col-1][0] += (error * 3/48);
-                ImagedataJJN[row+2][col][0] += (error * 5/48);
-                ImagedataJJN[row+2][col+1][0] += (error * 3/48);
-                ImagedataJJN[row+2][col+2][0] += (error * 1/48);
+                if(tempImage[row][col][0] > threshold) {
+                    error = tempImage[row][col][0] - 255;
+                }
+                else {
+                    error = tempImage[row][col][0] - 0;
+                }
+                tempImage[row][col-1][0] += (error * 7/48);
+                tempImage[row][col-2][0] += (error * 5/48);
+                tempImage[row+1][col-2][0] += (error * 3/48);
+                tempImage[row+1][col-1][0] += (error * 5/48);
+                tempImage[row+1][col][0] += (error * 7/48);
+                tempImage[row+1][col+1][0] += (error * 5/48);
+                tempImage[row+1][col+2][0] += (error * 3/48);
+                tempImage[row+2][col-2][0] += (error * 1/48);
+                tempImage[row+2][col-1][0] += (error * 3/48);
+                tempImage[row+2][col][0] += (error * 5/48);
+                tempImage[row+2][col+1][0] += (error * 3/48);
+                tempImage[row+2][col+2][0] += (error * 1/48);
+
+                if(tempImage[row][col][0] < threshold) {
+                    ImagedataJJN[row][col][0] = 0;
+                }
+                else {
+                    ImagedataJJN[row][col][0] = 255;
+                }  
             }
         }   
     }
@@ -132,7 +170,7 @@ int main(int argc, char *argv[]) {
     for(row = 0; row < Height; row++) {
         if(row%2 == 0) {
             for(col = 0; col < Width; col++) {
-                error = ImagedataStucki[row][col][0] - ImagedataFixTh[row][col][0];
+                error = ImagedataStucki[row][col][0] - 255;
                 ImagedataStucki[row][col+1][0] += (error * 8/42);
                 ImagedataStucki[row][col+2][0] += (error * 4/42);
                 ImagedataStucki[row+1][col-2][0] += (error * 2/42);
@@ -149,7 +187,7 @@ int main(int argc, char *argv[]) {
         }
         else{
             for(col = Width-1; col >= 0; col--) {
-                error = ImagedataStucki[row][col][0] - ImagedataFixTh[row][col][0];
+                error = ImagedataStucki[row][col][0] - 255;
                 ImagedataStucki[row][col-1][0] += (error * 8/42);
                 ImagedataStucki[row][col-2][0] += (error * 4/42);
                 ImagedataStucki[row+1][col-2][0] += (error * 2/42);
@@ -166,29 +204,6 @@ int main(int argc, char *argv[]) {
         }   
     }
 
-    for(row = 0; row < Height; row++) {
-        for(col = 0; col < Width; col++) {
-            if(ImagedataFS[row][col][0] < threshold) {
-                ImagedataFS[row][col][0] = 255;
-            }
-            else {
-                ImagedataFS[row][col][0] = 0;
-            }  
-            if(ImagedataJJN[row][col][0] <= threshold) {
-                ImagedataJJN[row][col][0] = 255;
-            }
-            else {
-                ImagedataJJN[row][col][0] = 0;
-            }  
-            if(ImagedataStucki[row][col][0] <= threshold) {
-                ImagedataStucki[row][col][0] = 255;
-            }
-            else {
-                ImagedataStucki[row][col][0] = 0;
-            }  
-
-        }
-    }
 
 
     // gray image
@@ -196,7 +211,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Cannot open file: " << argv[2] << std::endl;
 		exit(1);
 	}
-	fwrite(ImagedataFS, sizeof(unsigned char), Width * Height * 1, file);
+	fwrite(ImagedataFSResult, sizeof(unsigned char), Width * Height * 1, file);
 	fclose(file);
 
     if (!(file=fopen(argv[3],"wb"))) {
