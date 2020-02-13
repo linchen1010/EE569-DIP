@@ -166,45 +166,73 @@ int main(int argc, char *argv[]) {
         }   
     }
 
+    for(row = 0; row < Height; row++) {
+        for(col = 0; col < Width; col++) {
+            tempImage[row][col][0] = Imagedata[row][col][0];
+        }
+    }
+
     //Stucki
     for(row = 0; row < Height; row++) {
         if(row%2 == 0) {
             for(col = 0; col < Width; col++) {
-                error = ImagedataStucki[row][col][0] - 255;
-                ImagedataStucki[row][col+1][0] += (error * 8/42);
-                ImagedataStucki[row][col+2][0] += (error * 4/42);
-                ImagedataStucki[row+1][col-2][0] += (error * 2/42);
-                ImagedataStucki[row+1][col-1][0] += (error * 4/42);
-                ImagedataStucki[row+1][col][0] += (error * 8/42);
-                ImagedataStucki[row+1][col+1][0] += (error * 4/42);
-                ImagedataStucki[row+1][col+2][0] += (error * 2/42);
-                ImagedataStucki[row+2][col-2][0] += (error * 1/42);
-                ImagedataStucki[row+2][col-1][0] += (error * 2/42);
-                ImagedataStucki[row+2][col][0] += (error * 4/42);
-                ImagedataStucki[row+2][col+1][0] += (error * 2/42);
-                ImagedataStucki[row+2][col+2][0] += (error * 1/42);
+                if(tempImage[row][col][0] > threshold) {
+                    error = tempImage[row][col][0] - 255;
+                }
+                else {
+                    error = tempImage[row][col][0] - 0;
+                }
+                tempImage[row][col+1][0] += (error * 8/42);
+                tempImage[row][col+2][0] += (error * 4/42);
+                tempImage[row+1][col-2][0] += (error * 2/42);
+                tempImage[row+1][col-1][0] += (error * 4/42);
+                tempImage[row+1][col][0] += (error * 8/42);
+                tempImage[row+1][col+1][0] += (error * 4/42);
+                tempImage[row+1][col+2][0] += (error * 2/42);
+                tempImage[row+2][col-2][0] += (error * 1/42);
+                tempImage[row+2][col-1][0] += (error * 2/42);
+                tempImage[row+2][col][0] += (error * 4/42);
+                tempImage[row+2][col+1][0] += (error * 2/42);
+                tempImage[row+2][col+2][0] += (error * 1/42);
+
+                if(tempImage[row][col][0] < threshold) {
+                    ImagedataStucki[row][col][0] = 0;
+                }
+                else {
+                    ImagedataStucki[row][col][0] = 255;
+                }  
             }
         }
         else{
             for(col = Width-1; col >= 0; col--) {
-                error = ImagedataStucki[row][col][0] - 255;
-                ImagedataStucki[row][col-1][0] += (error * 8/42);
-                ImagedataStucki[row][col-2][0] += (error * 4/42);
-                ImagedataStucki[row+1][col-2][0] += (error * 2/42);
-                ImagedataStucki[row+1][col-1][0] += (error * 4/42);
-                ImagedataStucki[row+1][col][0] += (error * 8/42);
-                ImagedataStucki[row+1][col+1][0] += (error * 4/42);
-                ImagedataStucki[row+1][col+2][0] += (error * 2/42);
-                ImagedataStucki[row+2][col-2][0] += (error * 1/42);
-                ImagedataStucki[row+2][col-1][0] += (error * 2/42);
-                ImagedataStucki[row+2][col][0] += (error * 4/42);
-                ImagedataStucki[row+2][col+1][0] += (error * 2/42);
-                ImagedataStucki[row+2][col+2][0] += (error * 1/42);
+                if(tempImage[row][col][0] > threshold) {
+                    error = tempImage[row][col][0] - 255;
+                }
+                else {
+                    error = tempImage[row][col][0] - 0;
+                }
+                tempImage[row][col-1][0] += (error * 8/42);
+                tempImage[row][col-2][0] += (error * 4/42);
+                tempImage[row+1][col-2][0] += (error * 2/42);
+                tempImage[row+1][col-1][0] += (error * 4/42);
+                tempImage[row+1][col][0] += (error * 8/42);
+                tempImage[row+1][col+1][0] += (error * 4/42);
+                tempImage[row+1][col+2][0] += (error * 2/42);
+                tempImage[row+2][col-2][0] += (error * 1/42);
+                tempImage[row+2][col-1][0] += (error * 2/42);
+                tempImage[row+2][col][0] += (error * 4/42);
+                tempImage[row+2][col+1][0] += (error * 2/42);
+                tempImage[row+2][col+2][0] += (error * 1/42);
+
+                if(tempImage[row][col][0] < threshold) {
+                    ImagedataStucki[row][col][0] = 0;
+                }
+                else {
+                    ImagedataStucki[row][col][0] = 255;
+                }  
             }
         }   
     }
-
-
 
     // gray image
     if (!(file=fopen(argv[2],"wb"))) {
