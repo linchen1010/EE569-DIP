@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 	fread(Imagedata, sizeof(unsigned char), Width*Height*BytesPerPixel, file);
 	fclose(file);
 	
-	std::vector<int> bar;
+	std::vector<int> bar; // Circle horizonal length
 	double degree; // inorder to compute the x_bar in 1/4 circle
 
 	for(double i = 0; i < 256; i++) {
@@ -54,76 +54,65 @@ int main(int argc, char *argv[]) {
 		//std::cout << i << ": "<< bar[i] << std::endl;
 	}
 
-	int NewCol;
-	int factor;
+	int NewCol, NewCol_2; // NewCol in order to map, NewCol = a * col
+	int i;
 
-	//left upside of circle
-	int i = 255;
+	/** Warping Part **/
+	i = 255;
 	for(row = 0; row < 256; row++) {
 		for(col = 0; col < 256; col++) {
 
 			NewCol = col * bar[i] / 256 + (256-bar[i]);
-
+			NewCol_2 = col * bar[i] / 256;
+			// Left-up Circle
 			ImagedataWarp[row][NewCol][0] = Imagedata[row][col][0];
 			ImagedataWarp[row][NewCol][1] = Imagedata[row][col][1];
 			ImagedataWarp[row][NewCol][2] = Imagedata[row][col][2];
+			// Right-up Circle
+			ImagedataWarp[row][NewCol_2+256][0] = Imagedata[row][col+256][0]; 
+			ImagedataWarp[row][NewCol_2+256][1] = Imagedata[row][col+256][1];
+			ImagedataWarp[row][NewCol_2+256][2] = Imagedata[row][col+256][2];
 		}
 		i--;   
 	}
 	
-	//left down side of circle
 	i = 0;
 	for(row = 256; row < Height; row++) {
 		for(col = 0; col < 256; col++) {
 
 			NewCol = col * bar[i] / 256 + (256-bar[i]);
+			NewCol_2 = col * bar[i] / 256;
 
+			// Left-down Circle
 			ImagedataWarp[row][NewCol][0] = Imagedata[row][col][0];
 			ImagedataWarp[row][NewCol][1] = Imagedata[row][col][1];
 			ImagedataWarp[row][NewCol][2] = Imagedata[row][col][2];
+			// Right-down Circle
+			ImagedataWarp[row][NewCol_2+256][0] = Imagedata[row][col+256][0];
+			ImagedataWarp[row][NewCol_2+256][1] = Imagedata[row][col+256][1];
+			ImagedataWarp[row][NewCol_2+256][2] = Imagedata[row][col+256][2];
 		}
 		i++;
 	}
 
-	//right upside
-	i = 255;
-	for(row = 0; row < 256; row++) {
-		for(col = 0; col < 256; col++) {
-
-			NewCol = col * bar[i] / 256;
-			// move to origin, then move back
-			ImagedataWarp[row][NewCol+256][0] = Imagedata[row][col+256][0]; 
-			ImagedataWarp[row][NewCol+256][1] = Imagedata[row][col+256][1];
-			ImagedataWarp[row][NewCol+256][2] = Imagedata[row][col+256][2];
-		}
-		i--;
-	}
+	int ReverseCol, ReverseCol_2;
 	
-	//right downside
-	i = 0;
-	for(row = 256; row < Height; row++) {
-		for(col = 0; col < 256; col++) {
-
-			NewCol = col * bar[i] / 256;
-
-			ImagedataWarp[row][NewCol+256][0] = Imagedata[row][col+256][0];
-			ImagedataWarp[row][NewCol+256][1] = Imagedata[row][col+256][1];
-			ImagedataWarp[row][NewCol+256][2] = Imagedata[row][col+256][2];
-		}
-		i++;
-	}
-
-	int ReverseCol;
-	
+	/** Reverse Part **/
 	i = 255;
 	for(row = 0; row < 256; row++) {
 		for(col = 0; col < 256; col++) {
 			
-			NewCol = col * bar[i] / 256 + (256-bar[i]);
-			
-			ImagedataReverse[row][col][0] = ImagedataWarp[row][NewCol][0];
-			ImagedataReverse[row][col][1] = ImagedataWarp[row][NewCol][1];
-			ImagedataReverse[row][col][2] = ImagedataWarp[row][NewCol][2];
+			ReverseCol = col * bar[i] / 256 + (256-bar[i]);
+			ReverseCol_2 = col * bar[i] / 256;
+
+			// Left-up Circle
+			ImagedataReverse[row][col][0] = ImagedataWarp[row][ReverseCol][0];
+			ImagedataReverse[row][col][1] = ImagedataWarp[row][ReverseCol][1];
+			ImagedataReverse[row][col][2] = ImagedataWarp[row][ReverseCol][2];
+			// Right-up Circle
+			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][ReverseCol_2+256][0];
+			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][ReverseCol_2+256][1];
+			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][ReverseCol_2+256][2];
 		}
 		i--;
 	}
@@ -132,43 +121,20 @@ int main(int argc, char *argv[]) {
 	for(row = 256; row < Height; row++) {
 		for(col = 0; col < 256; col++) {
 			
-			NewCol = col * bar[i] / 256 + (256-bar[i]);
-			
-			ImagedataReverse[row][col][0] = ImagedataWarp[row][NewCol][0];
-			ImagedataReverse[row][col][1] = ImagedataWarp[row][NewCol][1];
-			ImagedataReverse[row][col][2] = ImagedataWarp[row][NewCol][2];
+			ReverseCol = col * bar[i] / 256 + (256-bar[i]);
+			ReverseCol_2 = col * bar[i] / 256;
+
+			// Left-down Circle
+			ImagedataReverse[row][col][0] = ImagedataWarp[row][ReverseCol][0];
+			ImagedataReverse[row][col][1] = ImagedataWarp[row][ReverseCol][1];
+			ImagedataReverse[row][col][2] = ImagedataWarp[row][ReverseCol][2];
+			// Right-down Circle
+			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][ReverseCol_2+256][0];
+			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][ReverseCol_2+256][1];
+			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][ReverseCol_2+256][2];
 		}
 		i++;
 	}
-
-	i = 255;
-	for(row = 0; row < 256; row++) {
-		for(col = 0; col < 256; col++) {
-
-			NewCol = col * bar[i] / 256;
-
-			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][NewCol+256][0];
-			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][NewCol+256][1];
-			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][NewCol+256][2];
-		}
-		i--;
-	}
-
-	i = 0;
-	for(row = 256; row < Height; row++) {
-		for(col = 0; col < 256; col++) {
-
-			NewCol = col * bar[i] / 256;
-
-			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][NewCol+256][0];
-			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][NewCol+256][1];
-			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][NewCol+256][2];
-		}
-		i++;
-	}
-
-
-
 
 	
 
@@ -185,7 +151,6 @@ int main(int argc, char *argv[]) {
 	}
 	fwrite(ImagedataReverse, sizeof(unsigned char), Width * Height * 3, file);
 	fclose(file);
-	
 
 	return 0;
 }
