@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "program_name input_image.raw output_image.raw" << std::endl;
 		return 0;
 	}
-    // Allocate image data array **
+    // Allocate image data array
 	unsigned char Imagedata[Height][Width][BytesPerPixel];
 	unsigned char ImagedataWarp[Height][Width][BytesPerPixel];
 
@@ -44,15 +44,13 @@ int main(int argc, char *argv[]) {
 	fread(Imagedata, sizeof(unsigned char), Width*Height*BytesPerPixel, file);
 	fclose(file);
 	
-	////////////////////////////////////////////////////////////////////////////////////
 	std::vector<int> bar;
 	double degree; // inorder to compute the x_bar in 1/4 circle
 
 	for(double i = 0; i < 256; i++) {
 		degree = asin(i/256);
 		bar.push_back(256*cos(degree));
-		std::cout << i << ": "<< bar[i] << std::endl;
-		
+		//std::cout << i << ": "<< bar[i] << std::endl;
 	}
 
 	int NewRow, NewCol;
@@ -91,7 +89,7 @@ int main(int argc, char *argv[]) {
 	for(row = 0; row < 256; row++) {
 		for(col = 0; col < 256; col++) {
 
-			NewCol = col * bar[i] / 256  ;
+			NewCol = col * bar[i] / 256;
 			// move to origin, then move back
 			ImagedataWarp[row][NewCol+256][0] = Imagedata[row][col+256][0]; 
 			ImagedataWarp[row][NewCol+256][1] = Imagedata[row][col+256][1];
@@ -105,22 +103,17 @@ int main(int argc, char *argv[]) {
 	for(row = 256; row < Height; row++) {
 		for(col = 0; col < 256; col++) {
 
-			NewCol = col * bar[i] / 256  ;
+			NewCol = col * bar[i] / 256;
 
-			ImagedataWarp[row][NewCol+256][0] = Imagedata[row][col+255][0];
-			ImagedataWarp[row][NewCol+256][1] = Imagedata[row][col+255][1];
-			ImagedataWarp[row][NewCol+256][2] = Imagedata[row][col+255][2];
+			ImagedataWarp[row][NewCol+256][0] = Imagedata[row][col+256][0];
+			ImagedataWarp[row][NewCol+256][1] = Imagedata[row][col+256][1];
+			ImagedataWarp[row][NewCol+256][2] = Imagedata[row][col+256][2];
 		}
 		i++;
 	}
 
-	
-	
-	
-
-
 	if (!(file=fopen(argv[2],"wb"))) {
-		std::cout << "Cannot open file: " << argv[6] << std::endl;
+		std::cout << "Cannot open file: " << argv[2] << std::endl;
 		exit(1);
 	}
 	fwrite(ImagedataWarp, sizeof(unsigned char), Width * Height * 3, file);
