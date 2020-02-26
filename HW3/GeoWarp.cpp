@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
     // Allocate image data array
 	unsigned char Imagedata[Height][Width][BytesPerPixel];
 	unsigned char ImagedataWarp[Height][Width][BytesPerPixel];
+	unsigned char ImagedataReverse[Height][Width][BytesPerPixel];
 
     // Read image (filename specified by first argument) into image data matrix
 	if (!(file=fopen(argv[1],"rb"))) {
@@ -53,7 +54,7 @@ int main(int argc, char *argv[]) {
 		//std::cout << i << ": "<< bar[i] << std::endl;
 	}
 
-	int NewRow, NewCol;
+	int NewCol;
 	int factor;
 
 	//left upside of circle
@@ -112,11 +113,77 @@ int main(int argc, char *argv[]) {
 		i++;
 	}
 
+	int ReverseCol;
+	
+	i = 255;
+	for(row = 0; row < 256; row++) {
+		for(col = 0; col < 256; col++) {
+			
+			NewCol = col * bar[i] / 256 + (256-bar[i]);
+			
+			ImagedataReverse[row][col][0] = ImagedataWarp[row][NewCol][0];
+			ImagedataReverse[row][col][1] = ImagedataWarp[row][NewCol][1];
+			ImagedataReverse[row][col][2] = ImagedataWarp[row][NewCol][2];
+		}
+		i--;
+	}
+
+	i = 0;
+	for(row = 256; row < Height; row++) {
+		for(col = 0; col < 256; col++) {
+			
+			NewCol = col * bar[i] / 256 + (256-bar[i]);
+			
+			ImagedataReverse[row][col][0] = ImagedataWarp[row][NewCol][0];
+			ImagedataReverse[row][col][1] = ImagedataWarp[row][NewCol][1];
+			ImagedataReverse[row][col][2] = ImagedataWarp[row][NewCol][2];
+		}
+		i++;
+	}
+
+	i = 255;
+	for(row = 0; row < 256; row++) {
+		for(col = 0; col < 256; col++) {
+
+			NewCol = col * bar[i] / 256;
+
+			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][NewCol+256][0];
+			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][NewCol+256][1];
+			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][NewCol+256][2];
+		}
+		i--;
+	}
+
+	i = 0;
+	for(row = 256; row < Height; row++) {
+		for(col = 0; col < 256; col++) {
+
+			NewCol = col * bar[i] / 256;
+
+			ImagedataReverse[row][col+256][0] = ImagedataWarp[row][NewCol+256][0];
+			ImagedataReverse[row][col+256][1] = ImagedataWarp[row][NewCol+256][1];
+			ImagedataReverse[row][col+256][2] = ImagedataWarp[row][NewCol+256][2];
+		}
+		i++;
+	}
+
+
+
+
+	
+
 	if (!(file=fopen(argv[2],"wb"))) {
 		std::cout << "Cannot open file: " << argv[2] << std::endl;
 		exit(1);
 	}
 	fwrite(ImagedataWarp, sizeof(unsigned char), Width * Height * 3, file);
+	fclose(file);
+
+	if (!(file=fopen(argv[3],"wb"))) {
+		std::cout << "Cannot open file: " << argv[2] << std::endl;
+		exit(1);
+	}
+	fwrite(ImagedataReverse, sizeof(unsigned char), Width * Height * 3, file);
 	fclose(file);
 	
 
