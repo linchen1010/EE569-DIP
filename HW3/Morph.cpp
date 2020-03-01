@@ -6,8 +6,10 @@
 //Submission Date:  
 //Compiled on MAC cmd with g++
 // Usuage:
-// >> g++ GeoWarp.cpp -o GeoWarp
-// >> ./GeoWarp OringalImg.raw WarpImg.raw ReverseImg.raw
+// >> g++ -std=c++11 Morph.cpp -o Morph.cpp
+// >> ./Morph fan.raw fanShrink.raw
+// To get Thin & Skeleton, need to comment Shrink table and 
+// use different Unconditional LUT
 /*--------------------------------------------*/
 
 #include <stdio.h>
@@ -21,6 +23,7 @@ std::string MaskToString(std::vector<char> pattern);
 int Bond(std::vector<unsigned char> pattern);
 bool CheckCondPattern(std::vector<unsigned char> &ImgPattern, int bond);
 bool CheckUnConPattern (std::vector<unsigned char> &pattern);
+bool CheckUnConPatternSK (std::vector<unsigned char> &pattern);
 
 int main(int argc, char *argv[]) {
     FILE *file;
@@ -29,6 +32,7 @@ int main(int argc, char *argv[]) {
     int Height = 558;
 	int row = 0;
 	int col = 0;
+    int cnt = 0;
 
     // Check for proper syntax
 	if (argc < 2){
@@ -39,7 +43,8 @@ int main(int argc, char *argv[]) {
     // Allocate image data array
 	unsigned char Imagedata[Height][Width][BytesPerPixel];
     unsigned char ImagedataBinary[Height][Width][BytesPerPixel];
-	unsigned char Morph[Height][Width][BytesPerPixel];
+    unsigned char Morph[Height][Width][BytesPerPixel];
+    unsigned char tempImg[Height][Width][BytesPerPixel];
 
     // Read image (filename specified by first argument) into image data matrix
 	if (!(file=fopen(argv[1],"rb"))) {
@@ -66,7 +71,15 @@ int main(int argc, char *argv[]) {
     int temp = 0;
     bool flag = true;
     std::vector<unsigned char> pattern;
-    while(n < 2) {
+    while(flag) {
+        cnt = 0;
+    for(row = 0; row < Height; row++) {
+        for(col = 1; col < Width; col++) {
+            Morph[row][col][0] = 0;
+            tempImg[row][col][0] = ImagedataBinary[row][col][0];
+        }
+    }
+    //unsigned char Morph[Height][Width][BytesPerPixel];
     for(row = 1; row < Height-1; row++) {
         for(col = 1; col < Width-1; col++) {
             if(ImagedataBinary[row][col][0] == 1) {
@@ -95,6 +108,7 @@ int main(int argc, char *argv[]) {
                         pattern.push_back(Morph[row+i][col+j][0]);
                     }
                 }
+                CheckUnConPattern(pattern);
                 if(!CheckUnConPattern(pattern) && Morph[row][col][0]==1) {
                     ImagedataBinary[row][col][0] = 0;
                 }
@@ -103,7 +117,15 @@ int main(int argc, char *argv[]) {
         }
     }
     n++;
-    std::cout << "stage 2: " << n  << "%" << std::endl;
+    for(row = 0; row < Height; row++) {
+        for(col = 0; col < Width; col++) {
+            if(tempImg[row][col][0]==ImagedataBinary[row][col][0]) {
+                cnt++;
+            }
+        }
+    }
+    if(cnt == Height * Width) flag = false;
+    std::cout << "Processing-> " << n  << " times" << std::endl; // fanShrink : 219 // Maze : 902
     }
 
     for(row = 0; row < Height ; row++) {
@@ -114,17 +136,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-    std::cout << stk.size() << std::endl;
-    std::cout << STK_me.size() << std::endl;
-
-    for(n = 0; n < Shrink.size(); n++) {
-        if(Shrink[n] != Shrink_me[n]) {
-            std::cout << "Not Same:" << n << std::endl;
-        }
-    }
-
-
 	if (!(file=fopen(argv[2],"wb"))) {
 		std::cout << "Cannot open file: " << argv[2] << std::endl;
 		exit(1);
@@ -132,10 +143,11 @@ int main(int argc, char *argv[]) {
 	fwrite(ImagedataBinary, sizeof(unsigned char), Width * Height * BytesPerPixel, file);
 	fclose(file);
 
-	
-
 	return 0;
 }
+
+
+/*********FUNCTION PART**************/
 
 std::string MaskToString(std::vector<char> pattern) {
     std::string str_pattern (pattern.begin(), pattern.end());
@@ -353,18 +365,26 @@ bool CheckUnConPattern (std::vector<unsigned char> &pattern) {
     int i = 0;
     int index = 0;
     bool ABC_Flag = false;
+    bool ABC = false;
     bool D_Flag = false;
 
     int n = 0;
 
     for(i = 0;i < st_.size(); i++) { // First, see if pattern have match to the LUT
-
+        
+        ABC = false;
+        ABC_Flag = false;
+        D_Flag = false;
+         //without ABCD
         if(pattern == st_[i]) {
+             //std::cout << "0" << std::endl;
             return true;
         }
 
         for(index = 0; index < st_[0].size(); index++) { // IF not, see LUT with A,B,C and D
+            
             if(st_[i][index] == 2) {
+                ABC = true; // contain ABC
                 st_[i][index] = pattern[index];
                 if(pattern[index] == 1) { // IF AorBorC, ABC_Flag is ture, otherwise, ABC_Flag is false
                     ABC_Flag = true;
@@ -372,33 +392,36 @@ bool CheckUnConPattern (std::vector<unsigned char> &pattern) {
             }
             else if(st_[i][index] == 3) { // IF D, D_FLAG is true
                 st_[i][index] = pattern[index];
-                if(pattern[index] == 1 || pattern[index] == 0) {
-                    D_Flag = true;
-                }
+                D_Flag = true;
             }
         }
 
-        if(pattern == st_[i] && ABC_Flag && D_Flag) { // pattern with ABC / D
-            return true;
+        if(ABC && D_Flag) {
+            if(pattern == st_[i] && ABC_Flag && D_Flag) { // pattern with ABC / D
+                //std::cout << "ABC and D---" ;
+                return true;
+            }
         }
-        else if(pattern == st_[i] && ABC_Flag) { // pattern without D
-            return true;
+        else if(ABC) {
+            if(pattern == st_[i] && ABC_Flag) {
+                //std::cout << "ABC";
+                return true;
+            }
         }
-        else if(pattern == st_[i] && D_Flag) { // pattern with D
-            return true;
+        else if(D_Flag){
+            if(pattern == st_[i]) { // pattern with D
+                //std::cout << "D" ;
+                return true;
+            }
         }
-
-        else 
-            return false;
     }
-
     return false;
 
+}
 
 
-   
-    
-
+/* Skeleton Table Check */
+bool CheckUnConPatternSK(std::vector<unsigned char> &pattern) {
     std::vector<std::vector<unsigned char>> k_= {{0,0,0,0,1,0,0,0,1},
                                                 {0,0,0,0,1,0,1,0,0},
                                                 {0,0,1,0,1,0,0,0,0},
@@ -425,6 +448,49 @@ bool CheckUnConPattern (std::vector<unsigned char> &pattern) {
                                                 {0,1,3,1,1,0,3,0,1},
                                                 {3,0,1,1,1,0,0,1,3},
                                                 {1,0,3,0,1,1,3,1,0}};
+    int i = 0;
+    int index = 0;
+    bool ABC_Flag = false;
+    bool D_Flag = false;
+
+    int n = 0;
+
+    for(i = 0;i < k_.size(); i++) { // First, see if pattern have match to the LUT
+
+        if(pattern == k_[i]) {
+            return true;
+        }
+
+        for(index = 0; index < k_[0].size(); index++) { // IF not, see LUT with A,B,C and D
+            if(k_[i][index] == 2) {
+                k_[i][index] = pattern[index];
+                if(pattern[index] == 1) { // IF AorBorC, ABC_Flag is ture, otherwise, ABC_Flag is false
+                    ABC_Flag = true;
+                }
+            }
+            else if(k_[i][index] == 3) { // IF D, D_FLAG is true
+                k_[i][index] = pattern[index];
+                if(pattern[index] == 1 || pattern[index] == 0) {
+                    D_Flag = true;
+                }
+            }
+        }
+
+        if(pattern == k_[i] && ABC_Flag && D_Flag) { // pattern with ABC / D
+            return true;
+        }
+        else if(pattern == k_[i] && ABC_Flag) { // pattern without D
+            return true;
+        }
+        else if(pattern == k_[i] && D_Flag) { // pattern with D
+            return true;
+        }
+
+        else 
+            return false;
+    }
+
+    return false;
     
 }
 
