@@ -8,8 +8,9 @@
 // Usuage:
 // >> g++ -std=c++11 Morph.cpp -o Morph.cpp
 // >> ./Morph fan.raw fanShrink.raw
-// To get Thin & Skeleton, need to comment Shrink table and 
-// use different Unconditional LUT
+// To get Shrink, Thin & Skeleton, need to switch
+// Condition checking Pattern Function (CCPTH,CCPSK...) 
+//and use different Unconditional LUT 
 /*--------------------------------------------*/
 
 #include <stdio.h>
@@ -19,17 +20,18 @@
 #include <vector>
 #include <string>
 
-std::string MaskToString(std::vector<char> pattern);
 int Bond(std::vector<unsigned char> pattern);
 bool CheckCondPattern(std::vector<unsigned char> &ImgPattern, int bond);
+bool CheckCondPatternTh(std::vector<unsigned char> &ImgPattern, int bond);
+bool CheckCondPatternSK(std::vector<unsigned char> &ImgPattern, int bond);
 bool CheckUnConPattern (std::vector<unsigned char> &pattern);
 bool CheckUnConPatternSK (std::vector<unsigned char> &pattern);
 
 int main(int argc, char *argv[]) {
     FILE *file;
     int BytesPerPixel = 1; // Greyscale
-    int Width = 558;
-    int Height = 558;
+    int Width = 315;
+    int Height = 356;
 	int row = 0;
 	int col = 0;
     int cnt = 0;
@@ -88,7 +90,7 @@ int main(int argc, char *argv[]) {
                         pattern.push_back(ImagedataBinary[row+i][col+j][0]);
                     }
                 }
-                if(CheckCondPattern(pattern,Bond(pattern))) {
+                if(CheckCondPatternSK(pattern,Bond(pattern))) {
                     Morph[row][col][0] = 1;
                 }
                 else {
@@ -108,8 +110,7 @@ int main(int argc, char *argv[]) {
                         pattern.push_back(Morph[row+i][col+j][0]);
                     }
                 }
-                CheckUnConPattern(pattern);
-                if(!CheckUnConPattern(pattern) && Morph[row][col][0]==1) {
+                if(!CheckUnConPatternSK(pattern) && Morph[row][col][0]==1) {
                     ImagedataBinary[row][col][0] = 0;
                 }
                 //else flag = false;
@@ -125,7 +126,10 @@ int main(int argc, char *argv[]) {
         }
     }
     if(cnt == Height * Width) flag = false;
-    std::cout << "Processing-> " << n  << " times" << std::endl; // fanShrink : 219 // Maze : 902
+    std::cout << "Processing-> " << n  << " times" << std::endl; 
+    // fanShrink : 219 // mazeShrink : 902 // cupShrink : 106
+    // fanThin : 49    // mazeThin : 54    // cupThin : 90
+    // fanSkeleton : 35// mazeSkeleton : 45// cupSkeleton : 80
     }
 
     for(row = 0; row < Height ; row++) {
@@ -148,11 +152,6 @@ int main(int argc, char *argv[]) {
 
 
 /*********FUNCTION PART**************/
-
-std::string MaskToString(std::vector<char> pattern) {
-    std::string str_pattern (pattern.begin(), pattern.end());
-    return str_pattern;
-}
 
 int Bond(std::vector<unsigned char> pattern) {
     int b = 0;
@@ -206,16 +205,6 @@ bool CheckCondPattern(std::vector<unsigned char> &ImgPattern, int bond) {
                 }
                 else
                     break;
-            // case 4:
-            //     TK4 = {{0,1,0,0,1,1,0,0,0},
-            //            {0,1,0,1,1,0,0,0,0},
-            //            {0,0,0,1,1,0,0,1,0},
-            //            {0,0,0,0,1,1,0,1,0}}; 
-            //     if(ImgPattern == TK4[0] || ImgPattern == TK4[1] || ImgPattern == TK4[2] || ImgPattern == TK4[3]) {
-            //         return true;
-            //     }
-            //     else
-            //         break;
             case 4:
                 STK4 = {{0,0,1,0,1,1,0,0,1},
                        {1,1,1,0,1,0,0,0,0},
@@ -306,16 +295,222 @@ bool CheckCondPattern(std::vector<unsigned char> &ImgPattern, int bond) {
                 }
                 else
                     break;
-            // case 11:
-            //     K11 = {{1,1,1,1,1,1,0,1,1},
-            //            {1,1,1,1,1,1,1,1,0},
-            //            {1,1,0,1,1,1,1,1,1},
-            //            {0,1,1,1,1,1,1,1,1}};
-            //     if(ImgPattern == K11[0] || ImgPattern == K11[1] || ImgPattern == K11[2] || ImgPattern == K11[3]) {
-            //         return true;
-            //     }
-            //     else
-            //         break;
+            default: 
+                return false;
+        }
+        return false;
+}
+
+bool CheckCondPatternTh(std::vector<unsigned char> &ImgPattern, int bond) {
+    std::vector<std::vector<unsigned char>> S1, S2, S3, TK4, STK4, ST5_1, ST5_2, ST6, STK6, STK7, STK8, STK9, STK10, K11;  
+    
+        switch (bond) {
+            case 4:
+                TK4 = {{0,1,0,0,1,1,0,0,0},
+                       {0,1,0,1,1,0,0,0,0},
+                       {0,0,0,1,1,0,0,1,0},
+                       {0,0,0,0,1,1,0,1,0}}; 
+                STK4 = {{0,0,1,0,1,1,0,0,1},
+                       {1,1,1,0,1,0,0,0,0},
+                       {1,0,0,1,1,0,1,0,0},
+                       {0,0,0,0,1,0,1,1,1}}; 
+                if(ImgPattern == TK4[0] || ImgPattern == TK4[1] || ImgPattern == TK4[2] || ImgPattern == TK4[3] ||
+                   ImgPattern == STK4[0] || ImgPattern == STK4[1] || ImgPattern == STK4[2] || ImgPattern == STK4[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 5:
+                ST5_1 = {{1,1,0,0,1,1,0,0,0},
+                         {0,1,0,0,1,1,0,0,1},
+                         {0,1,1,1,1,0,0,0,0},
+                         {0,0,1,0,1,1,0,1,0}};
+
+                ST5_2 = {{0,1,1,0,1,1,0,0,0},
+                         {1,1,0,1,1,0,0,0,0},
+                         {0,0,0,1,1,0,1,1,0},
+                         {0,0,0,0,1,1,0,1,1}};
+                if(ImgPattern == ST5_1[0] || ImgPattern == ST5_1[1] || ImgPattern == ST5_1[2] || ImgPattern == ST5_1[3] ||
+                   ImgPattern == ST5_2[0] || ImgPattern == ST5_2[1] || ImgPattern == ST5_2[2] || ImgPattern == ST5_2[3] ) {
+                    return true;
+                }
+                else        
+                    break;
+            case 6:
+                ST6 = {{1,1,0,0,1,1,0,0,1},
+                       {0,1,1,1,1,0,1,0,0}};
+
+                STK6 = {{1,1,1,0,1,1,0,0,0},
+                        {0,1,1,0,1,1,0,0,1},
+                        {1,1,1,1,1,0,0,0,0},
+                        {1,1,0,1,1,0,1,0,0},
+                        {1,0,0,1,1,0,1,1,0},
+                        {0,0,0,1,1,0,1,1,1},
+                        {0,0,0,0,1,1,1,1,1},
+                        {0,0,1,0,1,1,0,1,1}};
+                if(ImgPattern == ST6[0] || ImgPattern == ST6[1] || ImgPattern == STK6[0] || ImgPattern == STK6[1] ||
+                   ImgPattern == STK6[2] || ImgPattern == STK6[3] || ImgPattern == STK6[4] || ImgPattern == STK6[5] ||
+                   ImgPattern == STK6[6] || ImgPattern == STK6[7] ) {
+                    return true;
+                }
+                else
+                    break;
+            case 7:
+                STK7 = {{1,1,1,0,1,1,0,0,1},
+                        {1,1,1,1,1,0,1,0,0},
+                        {1,0,0,1,1,0,1,1,1},
+                        {0,0,1,0,1,1,1,1,1}};
+                if(ImgPattern == STK7[0] || ImgPattern == STK7[1] || ImgPattern == STK7[2] || ImgPattern == STK7[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 8:
+                STK8 = {{0,1,1,0,1,1,0,1,1},
+                        {1,1,1,1,1,1,0,0,0},
+                        {1,1,0,1,1,0,1,1,0},
+                        {0,0,0,1,1,1,1,1,1}};
+                if(ImgPattern == STK8[0] || ImgPattern == STK8[1] || ImgPattern == STK8[2] || ImgPattern == STK8[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 9:
+                STK9 = {{1,1,1,0,1,1,0,1,1},
+                        {0,1,1,0,1,1,1,1,1},
+                        {1,1,1,1,1,1,1,0,0},
+                        {1,1,1,1,1,1,0,0,1},
+                        {1,1,1,1,1,0,1,1,0},
+                        {1,1,0,1,1,0,1,1,1},
+                        {1,0,0,1,1,1,1,1,1},
+                        {0,0,1,1,1,1,1,1,1}};
+                if(ImgPattern == STK9[0] || ImgPattern == STK9[1] || ImgPattern == STK9[2] || ImgPattern == STK9[3] ||
+                   ImgPattern == STK9[4] || ImgPattern == STK9[5] || ImgPattern == STK9[6] || ImgPattern == STK9[7] ) {
+                    return true;
+                }
+                else
+                    break;
+            case 10:
+                STK10 = {{1,1,1,0,1,1,1,1,1},
+                         {1,1,1,1,1,1,1,0,1},
+                         {1,1,1,1,1,0,1,1,1},
+                         {1,0,1,1,1,1,1,1,1}};
+                if(ImgPattern == STK10[0] || ImgPattern == STK10[1] || ImgPattern == STK10[2] || ImgPattern == STK10[3]) {
+                    return true;
+                }
+                else
+                    break;
+            default: 
+                return false;
+        }
+        return false;
+}
+
+bool CheckCondPatternSK(std::vector<unsigned char> &ImgPattern, int bond) {
+    std::vector<std::vector<unsigned char>> S1, S2, S3, TK4, STK4, ST5_1, ST5_2, ST6, STK6, STK7, STK8, STK9, STK10, K11;  
+    
+        switch (bond) {
+            case 4:
+                TK4 = {{0,1,0,0,1,1,0,0,0},
+                       {0,1,0,1,1,0,0,0,0},
+                       {0,0,0,1,1,0,0,1,0},
+                       {0,0,0,0,1,1,0,1,0}}; 
+                STK4 = {{0,0,1,0,1,1,0,0,1},
+                       {1,1,1,0,1,0,0,0,0},
+                       {1,0,0,1,1,0,1,0,0},
+                       {0,0,0,0,1,0,1,1,1}}; 
+                if(ImgPattern == TK4[0] || ImgPattern == TK4[1] || ImgPattern == TK4[2] || ImgPattern == TK4[3] ||
+                   ImgPattern == STK4[0] || ImgPattern == STK4[1] || ImgPattern == STK4[2] || ImgPattern == STK4[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 5:
+                ST5_1 = {{1,1,0,0,1,1,0,0,0},
+                         {0,1,0,0,1,1,0,0,1},
+                         {0,1,1,1,1,0,0,0,0},
+                         {0,0,1,0,1,1,0,1,0}};
+
+                ST5_2 = {{0,1,1,0,1,1,0,0,0},
+                         {1,1,0,1,1,0,0,0,0},
+                         {0,0,0,1,1,0,1,1,0},
+                         {0,0,0,0,1,1,0,1,1}};
+                if(ImgPattern == ST5_1[0] || ImgPattern == ST5_1[1] || ImgPattern == ST5_1[2] || ImgPattern == ST5_1[3] ||
+                   ImgPattern == ST5_2[0] || ImgPattern == ST5_2[1] || ImgPattern == ST5_2[2] || ImgPattern == ST5_2[3] ) {
+                    return true;
+                }
+                else        
+                    break;
+            case 6:
+                STK6 = {{1,1,1,0,1,1,0,0,0},
+                        {0,1,1,0,1,1,0,0,1},
+                        {1,1,1,1,1,0,0,0,0},
+                        {1,1,0,1,1,0,1,0,0},
+                        {1,0,0,1,1,0,1,1,0},
+                        {0,0,0,1,1,0,1,1,1},
+                        {0,0,0,0,1,1,1,1,1},
+                        {0,0,1,0,1,1,0,1,1}};
+                if(ImgPattern == STK6[0] || ImgPattern == STK6[1] || ImgPattern == STK6[2] || ImgPattern == STK6[3] || 
+                   ImgPattern == STK6[4] || ImgPattern == STK6[5] || ImgPattern == STK6[6] || ImgPattern == STK6[7] ) {
+                    return true;
+                }
+                else
+                    break;
+            case 7:
+                STK7 = {{1,1,1,0,1,1,0,0,1},
+                        {1,1,1,1,1,0,1,0,0},
+                        {1,0,0,1,1,0,1,1,1},
+                        {0,0,1,0,1,1,1,1,1}};
+                if(ImgPattern == STK7[0] || ImgPattern == STK7[1] || ImgPattern == STK7[2] || ImgPattern == STK7[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 8:
+                STK8 = {{0,1,1,0,1,1,0,1,1},
+                        {1,1,1,1,1,1,0,0,0},
+                        {1,1,0,1,1,0,1,1,0},
+                        {0,0,0,1,1,1,1,1,1}};
+                if(ImgPattern == STK8[0] || ImgPattern == STK8[1] || ImgPattern == STK8[2] || ImgPattern == STK8[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 9:
+                STK9 = {{1,1,1,0,1,1,0,1,1},
+                        {0,1,1,0,1,1,1,1,1},
+                        {1,1,1,1,1,1,1,0,0},
+                        {1,1,1,1,1,1,0,0,1},
+                        {1,1,1,1,1,0,1,1,0},
+                        {1,1,0,1,1,0,1,1,1},
+                        {1,0,0,1,1,1,1,1,1},
+                        {0,0,1,1,1,1,1,1,1}};
+                if(ImgPattern == STK9[0] || ImgPattern == STK9[1] || ImgPattern == STK9[2] || ImgPattern == STK9[3] ||
+                   ImgPattern == STK9[4] || ImgPattern == STK9[5] || ImgPattern == STK9[6] || ImgPattern == STK9[7] ) {
+                    return true;
+                }
+                else
+                    break;
+            case 10:
+                STK10 = {{1,1,1,0,1,1,1,1,1},
+                         {1,1,1,1,1,1,1,0,1},
+                         {1,1,1,1,1,0,1,1,1},
+                         {1,0,1,1,1,1,1,1,1}};
+                if(ImgPattern == STK10[0] || ImgPattern == STK10[1] || ImgPattern == STK10[2] || ImgPattern == STK10[3]) {
+                    return true;
+                }
+                else
+                    break;
+            case 11:
+                K11 = {{1,1,1,1,1,1,0,1,1},
+                       {1,1,1,1,1,1,1,1,0},
+                       {1,1,0,1,1,1,1,1,1},
+                       {0,1,1,1,1,1,1,1,1}};
+                if(ImgPattern == K11[0] || ImgPattern == K11[1] || ImgPattern == K11[2] || ImgPattern == K11[3]) {
+                    return true;
+                }
+                else
+                    break;
             default: 
                 return false;
         }
@@ -451,18 +646,26 @@ bool CheckUnConPatternSK(std::vector<unsigned char> &pattern) {
     int i = 0;
     int index = 0;
     bool ABC_Flag = false;
+    bool ABC = false;
     bool D_Flag = false;
 
     int n = 0;
 
     for(i = 0;i < k_.size(); i++) { // First, see if pattern have match to the LUT
-
+        
+        ABC = false;
+        ABC_Flag = false;
+        D_Flag = false;
+         //without ABCD
         if(pattern == k_[i]) {
+             //std::cout << "0" << std::endl;
             return true;
         }
 
         for(index = 0; index < k_[0].size(); index++) { // IF not, see LUT with A,B,C and D
+            
             if(k_[i][index] == 2) {
+                ABC = true; // contain ABC
                 k_[i][index] = pattern[index];
                 if(pattern[index] == 1) { // IF AorBorC, ABC_Flag is ture, otherwise, ABC_Flag is false
                     ABC_Flag = true;
@@ -470,27 +673,31 @@ bool CheckUnConPatternSK(std::vector<unsigned char> &pattern) {
             }
             else if(k_[i][index] == 3) { // IF D, D_FLAG is true
                 k_[i][index] = pattern[index];
-                if(pattern[index] == 1 || pattern[index] == 0) {
-                    D_Flag = true;
-                }
+                D_Flag = true;
             }
         }
 
-        if(pattern == k_[i] && ABC_Flag && D_Flag) { // pattern with ABC / D
-            return true;
+        if(ABC && D_Flag) {
+            if(pattern == k_[i] && ABC_Flag && D_Flag) { // pattern with ABC / D
+                //std::cout << "ABC and D---" ;
+                return true;
+            }
         }
-        else if(pattern == k_[i] && ABC_Flag) { // pattern without D
-            return true;
+        else if(ABC) {
+            if(pattern == k_[i] && ABC_Flag) {
+                //std::cout << "ABC";
+                return true;
+            }
         }
-        else if(pattern == k_[i] && D_Flag) { // pattern with D
-            return true;
+        else if(D_Flag){
+            if(pattern == k_[i]) { // pattern with D
+                //std::cout << "D" ;
+                return true;
+            }
         }
-
-        else 
-            return false;
     }
-
     return false;
+
     
 }
 
