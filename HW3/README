@@ -1,0 +1,35 @@
+# EE569 Homework Assignment #3
+# Date:		March 03, 2020
+# Name:		Shi-Lin Chen
+# ID:		2991-9119-97
+# Email:	shilinch@usc.edu
+#
+# Compiled on MAC cmd with g++
+#
+# usage: (on cmd)
+# >> make -f README
+# compile all the .cpp file
+
+all: GeoWarp.cpp Morph.cpp Star.cpp PCB.cpp Gear.cpp 
+
+	g++ -std=c++11 -o GeoWarp GeoWarp.cpp  -lm
+	g++ -std=c++11 -o Morph Morph.cpp -lm
+	g++ -std=c++11 -o Star Srar.cpp  -lm
+	g++ -std=c++11 -o PCB PCB.cpp  -lm
+	g++ -std=c++11 -o Gear Gear.cpp  -lm
+
+.PHONY: GeoWarp Morph Star PCB Gear
+GeoWarp:
+	./GeoWarp Original.raw WarpImg.raw ReverseImg.raw
+Morph:
+	./Morph Img.raw ImgShrink.raw
+Star:
+	./Star stars.raw starsCCL.raw
+PCB:
+	./PCB PCB.raw PCB_Img.raw
+Gear:
+	./Gear GearTooth.raw GearDetect.raw
+
+
+clean:
+	rm -f GeoWarp Morph Star PCB Gear
