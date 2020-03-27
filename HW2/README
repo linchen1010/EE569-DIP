@@ -1,0 +1,41 @@
+# EE569 Homework Assignment #2
+# Date:		Feb, 16, 2020
+# Name:		Shi-Lin Chen
+# ID:		2991-9119-97
+# Email:	shilinch@usc.edu
+#
+# Compiled on MAC cmd with g++
+#
+# usage: (on cmd)
+# >> make -f README
+# compile all the .cpp file
+
+all: sobel.cpp sobelGallery.cpp Dithering_FixTh.cpp Dithering_RanTh.cpp DitheringMatrix.cpp ErrorDiffusion.cpp ColorHalf.cpp MBVQ.cpp
+	g++ -std=c++11 -o sobel sobel.cpp  -lm
+	g++ -std=c++11 -o sobelGallery sobelGallery.cpp  -lm
+	g++ -std=c++11 -o Dithering_FixTh Dithering_FixTh.cpp -lm
+	g++ -std=c++11 -o Dithering_RanTh Dithering_RanTh.cpp  -lm
+	g++ -std=c++11 -o DitheringMatrix DitheringMatrix.cpp  -lm
+	g++ -std=c++11 -o ErrorDiffusion ErrorDiffusion.cpp  -lm
+	g++ -std=c++11 -o ColorHalf ColorHalf.cpp  -lm
+	g++ -std=c++11 -o MBVQ MBVQ.cpp  -lm
+.PHONY: sobel sobelGallery Dithering_FixTh Dithering_RanTh DitheringMatrix ErrorDiffusion ColorHalf MBVQ
+sobel:
+	./sobel Dogs.raw DogGray.raw DogGrayXgradient.raw DogGrayYgradient.raw DogMagnitude.raw DogEdge128.raw 
+sobelGallery:
+	./sobelGaller GalleryGray.raw GalleryGrayXgradient.raw GalleryYGradient.raw GalleryMagnitude.raw GalleryEdge(th_value).raw
+Dithering_FixTh:
+	./Dihtering_FixTh LightHouse.raw LightHoseFixThreshold.raw
+Dithering_RanTh:
+	./Dithering_RanTh LightHouse.raw LightHoseRanTh.raw
+DitheringMatrix:
+	./DitheringMatrix LightHouse.raw LightHoseDI2.raw LightHoseDI8.raw LightHoseDI32.raw
+ErrorDiffusion:
+	./ErrorDifussion LightHouse.raw LightHoseEDFS.raw LightHoseEDJJN.raw LightHouseEDStucki.raw
+ColorHalf:
+	./ColorHalf Rose.raw RoseED.raw
+MBVQ:
+	./MBVQ Rose.raw RoseMBVQ.raw
+
+clean:
+	rm -f sobel sobelGallery Dithering_FixTh Dithering_RanTh DitheringMatrix ErrorDiffusion ColorHalf MBVQ
