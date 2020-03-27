@@ -1,0 +1,40 @@
+# EE569 Homework Assignment #1
+# Date:		Jan, 28, 2020
+# Name:		Shi-Lin Chen
+# ID:		2991-9119-97
+# Email:	shilinch@usc.edu
+#
+# Compiled on MAC cmd with g++
+#
+# usage: (on cmd)
+# >> make -f README
+# compile all the .cpp file
+# >> make -f README HW_Problem1
+# ./HW1_Problem1 Dog.raw Dog_Bilinear.raw
+
+all: HW1_Problem1.cpp HW1_Problem1_2.cpp HW1_Problem1_3.cpp HW1_Problem1_3_2.cpp HW1_Problem1_3_3.cpp HW1_Problem2_a.cpp HW1_Problem2_b.cpp
+	g++ -std=c++11 -o HW1_Problem1 HW1_Problem1.cpp  -lm
+	g++ -std=c++11 -o HW1_Problem1_2 HW1_Problem1_2.cpp  -lm
+	g++ -std=c++11 -o HW1_Problem1_3 HW1_Problem1_3.cpp -lm
+	g++ -std=c++11 -o HW1_Problem1_3_2 HW1_Problem1_3_2.cpp  -lm
+	g++ -std=c++11 -o HW1_Problem1_3_3 HW1_Problem1_3_3.cpp  -lm
+	g++ -std=c++11 -o HW1_Problem2_a HW1_Problem2_a.cpp  -lm
+	g++ -std=c++11 -o HW1_Problem2_b HW1_Problem2_b.cpp  -lm
+.PHONY: HW1_Problem1 HW1_Problem1_2 HW1_Problem1_3 HW1_Problem1_3_2 HW1_Problem1_3_3 HW1_Problem2_a HW1_Problem2_b
+HW1_Problem1:
+	./HW1_Problem1 Dog.raw Dog_Bilinear.raw
+HW1_Problem1_2:
+	./HW1_Problem1_2 Dog.raw Dog_MHC.raw
+HW1_Problem1_3:
+	./HW1_Problem1_3 Toy.raw Histogram.txt
+HW1_Problem1_3_2:
+	./HW1_Problem1_3_2 Toy.raw Transferfucntion.txt HistToyMethoA.raw
+HW1_Problem1_3_3:
+	./HW1_Problem1_3_3 Toy.raw HistogramMethodB.txt HistToyMethodB.raw
+HW1_Problem2_a:
+	./HW1_Problem2_a Corn_noisy.raw Corn_gray.raw Corn_uniDenoise.raw Corn_gauDenoise.raw
+HW1_Problem2_b:
+	./HW1_Problem2_b Corn_noisy.raw Corn_gray.raw Corn_bilateral.raw
+
+clean:
+	rm -f HW1_Problem1 HW1_Problem1_2 HW1_Problem1_3 HW1_Problem1_3_2 HW1_Problem1_3_3 HW1_Problem2_a HW1_Problem2_b
